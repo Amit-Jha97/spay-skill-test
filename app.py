@@ -62,11 +62,13 @@ st.markdown("""
     }
 
     .header-container {
-        width: 100%; margin-top: 10px; height: 110px;
+        width: 100%; margin-top: 30px; height: 110px;
         background: linear-gradient(to right, #1a237e, #4caf50, #fbc02d);
         display: flex; justify-content: center; align-items: center;
         color: white; border-radius: 10px; flex-direction: column;
     }
+    .header-title { font-size: 42px; font-weight: bold; }
+    .header-subtitle { font-size: 15px; font-weight: bold; }
     .warning-box {
         padding: 10px; background-color: #fff3cd; color: #856404;
         border-radius: 5px; text-align: center; font-weight: bold; margin-bottom: 10px;
