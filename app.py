@@ -187,11 +187,20 @@ questions = [
     {"q":"20% of 500 = ?","options":["80","90","100","110"],"cor":"100","cat":"Math"},
 ]
 
-if "questions_set" not in st.session_state or st.session_state.get("questions_user") != st.session_state.mobile:
-    st.session_state.questions_set = random.sample(questions, len(questions))
-    st.session_state.answers = [""] * len(st.session_state.questions_set)
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+if "otp_sent" not in st.session_state:
+    st.session_state.otp_sent = False
+
+if "questions_set" not in st.session_state:
+    sel_math = random.sample(math_pool, 10)
+    sel_eng = random.sample(english_pool, 10)
+    final_list = sel_math + sel_eng
+    random.shuffle(final_list)
+    
+    st.session_state.questions_set = final_list
+    st.session_state.answers = [""] * 20
     st.session_state.current_q = 0
-    st.session_state.questions_user = st.session_state.mobile
 
 # FORM
 col1, col2 = st.columns(2)
