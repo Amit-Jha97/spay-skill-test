@@ -14,37 +14,27 @@ def get_gspread_client():
         creds_dict = st.secrets["gcp_service_account"]
         scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
         creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
-        client = gspread.authorize(creds)
-        return client
+        return gspread.authorize(creds)
     except Exception as e:
         st.error(f"Google Connection Error: {e}")
         return None
 
-# ---------------- 50 QUESTIONS POOL (25 MATH + 25 ENGLISH) ----------------
-# NOTE: In lists mein aap apne baki ke sawal add kar sakte hain
+# ---------------- QUESTIONS POOL ----------------
 math_pool = [
     {"q":"25% of 200 = ?","options":["40","50","60","70"],"cor":"50","cat":"Math"},
-    {"q":"15% of 200 = ?","options":["20","25","30","35"],"cor":"30","cat":"Math"},
-    {"q":"30% of 600 = ?","options":["160","180","200","220"],"cor":"180","cat":"Math"},
-    {"q":"20% of 500 = ?","options":["80","90","100","110"],"cor":"100","cat":"Math"},
     {"q":"Square root of 144?","options":["10","12","14","16"],"cor":"12","cat":"Math"},
-] * 5  # Ye sirf demo ke liye 25 sawal banane ke liye hai
+] * 13 
 
 english_pool = [
     {"q":"She ___ to the office every day.","options":["go","goes","going","gone"],"cor":"goes","cat":"English"},
     {"q":"Opposite of success?","options":["failure","win","achieve","progress"],"cor":"failure","cat":"English"},
-    {"q":"Synonym of fast?","options":["slow","quick","delay","lazy"],"cor":"quick","cat":"English"},
-    {"q":"He speaks English ___ than his brother.","options":["good","better","best","well"],"cor":"better","cat":"English"},
-    {"q":"I ___ my homework yesterday.","options":["do","did","done","doing"],"cor":"did","cat":"English"},
-] * 5 # Ye sirf demo ke liye 25 sawal banane ke liye hai
+] * 13
 
 # ---------------- SESSION INIT ----------------
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 if "otp_sent" not in st.session_state:
     st.session_state.otp_sent = False
-if "mobile" not in st.session_state:
-    st.session_state.mobile = ""
 if "last_activity" not in st.session_state:
     st.session_state.last_activity = get_ist_time()
 
@@ -58,21 +48,42 @@ st.markdown("""
 <style>
     header {visibility: hidden !important;}
     footer {visibility: hidden !important;}
-    #MainMenu {visibility: hidden !important;}
     .stDeployButton {display:none !important;}
     .stApp { background-color: #f5f7fb; }
+    
+    /* Default Button (Previous ke liye Gradient) */
     div.stButton > button {
         background: linear-gradient(90deg, #ff007a, #a020f0) !important;
         color: white !important;
         border-radius: 10px !important;
-        height: 60px !important;
+        height: 55px !important;
         font-weight: bold !important;
         border: none !important;
+        width: 100% !important;
     }
+
+    /* Next aur Submit Button ko Dark Blue karne ke liye */
+    /* Hum 'div' ke nth-child ka use karenge ya text search */
+    /* Streamlit mein button identify karne ka best tarika niche wala CSS hai */
+    
+    div.stButton > button:active, div.stButton > button:focus {
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+    /* Specific Blue Color for NEXT and SUBMIT */
+    /* Note: Ye CSS tab kaam karega jab NEXT/SUBMIT buttons col2 mein honge */
+    .stColumn:nth-child(2) div.stButton > button {
+        background-color: #1a237e !important;
+        background-image: none !important; /* Gradient hatane ke liye */
+    }
+
     div.stButton > button:hover {
-        opacity: 1 !important;
-        background: linear-gradient(90deg, #ff007a, #a020f0) !important;
+        opacity: 0.9 !important;
+        box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
     }
+    
+    .input-label { font-weight: bold; margin-top: 10px; color: #1a237e; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -88,42 +99,32 @@ if not st.session_state.logged_in:
         otp_input = st.text_input("Enter OTP", type="password", placeholder="Enter OTP")
         
         if not st.session_state.otp_sent:
-            if st.button("SEND OTP", use_container_width=True):
+            if st.button("SEND OTP", key="send_otp"):
                 if len(mobile) == 10 and mobile.isdigit():
                     st.session_state.otp = str(random.randint(100000, 999999))
                     st.session_state.mobile = mobile
                     st.session_state.otp_sent = True
-                    st.session_state.otp_time = get_ist_time()
-                    st.success(f"✅ OTP Sent (Demo: {st.session_state.otp})")
+                    st.success(f"✅ OTP Sent (Test: {st.session_state.otp})")
                     st.rerun()
-                else:
-                    st.error("❌ Invalid Mobile")
         else:
-            if st.button("VERIFY OTP", use_container_width=True):
+            if st.button("VERIFY OTP", key="verify_otp"):
                 if otp_input == st.session_state.otp:
                     st.session_state.logged_in = True
-                    st.session_state.user_logged = st.session_state.mobile
                     st.rerun()
-                else:
-                    st.error("❌ Wrong OTP")
     st.stop()
 
-# ================= TEST PAGE (If logged in) =================
+# ================= TEST PAGE =================
 st.set_page_config(page_title="SPAY INDIA", layout="wide")
 
-# Select 20 Random Questions once
 if "questions_set" not in st.session_state:
     sel_math = random.sample(math_pool, 10)
     sel_eng = random.sample(english_pool, 10)
-    final_list = sel_math + sel_eng
-    random.shuffle(final_list)
-    st.session_state.questions_set = final_list
+    st.session_state.questions_set = sel_math + sel_eng
+    random.shuffle(st.session_state.questions_set)
     st.session_state.answers = [""] * 20
     st.session_state.current_q = 0
 
-# Auto Logout Check
-now = get_ist_time()
-if (now - st.session_state.last_activity).total_seconds() > 300:
+if (get_ist_time() - st.session_state.last_activity).total_seconds() > 300:
     logout()
 
 st.markdown("""
@@ -133,16 +134,17 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-st.warning("⚠️ Do NOT refresh this page. Progress will be lost.")
-
-# Form
-col_f1, col_f2 = st.columns(2)
+# Form Details
+col_f1, col_f2, col_f3 = st.columns(3)
 with col_f1:
-    candidate_name = st.text_input("Candidate Name", placeholder="Enter Name")
-    st.write(f"**Mobile:** {st.session_state.mobile}")
+    st.markdown('<div class="input-label">Candidate Name</div>', unsafe_allow_html=True)
+    c_name = st.text_input("", placeholder="Enter Name", label_visibility="collapsed")
 with col_f2:
-    hr_name = st.text_input("HR Name", placeholder="Enter HR Name")
-    team_name = st.text_input("Interview Team", placeholder="Enter Team Name")
+    st.markdown('<div class="input-label">HR Name</div>', unsafe_allow_html=True)
+    h_name = st.text_input("", placeholder="Enter HR Name", label_visibility="collapsed")
+with col_f3:
+    st.markdown('<div class="input-label">Interview Team</div>', unsafe_allow_html=True)
+    t_name = st.text_input("", placeholder="Enter Team Name", label_visibility="collapsed")
 
 st.divider()
 
@@ -157,34 +159,35 @@ ans = st.radio("Choose Option:", q_data["options"], key=f"ans_{q_idx}")
 st.session_state.answers[q_idx] = ans
 
 st.markdown("<br>", unsafe_allow_html=True)
-c_prev, c_next = st.columns(2)
 
-with c_prev:
+# Navigation Buttons
+col_btn1, col_btn2 = st.columns(2)
+
+with col_btn1:
     if q_idx > 0:
-        if st.button("← PREVIOUS", use_container_width=True):
+        if st.button("← PREVIOUS"):
             st.session_state.current_q -= 1
             st.rerun()
 
-with c_next:
+with col_btn2:
     if q_idx < 19:
-        if st.button("NEXT →", use_container_width=True):
+        if st.button("NEXT →"):
             st.session_state.last_activity = get_ist_time()
             st.session_state.current_q += 1
             st.rerun()
     else:
-        if st.button("SUBMIT TEST", use_container_width=True):
-            correct = sum(1 for i, q in enumerate(st.session_state.questions_set) if st.session_state.answers[i] == q["cor"])
+        if st.button("SUBMIT TEST"):
+            score = sum(1 for i, q in enumerate(st.session_state.questions_set) if st.session_state.answers[i] == q["cor"])
             client = get_gspread_client()
             if client:
                 try:
                     sheet = client.open("Assessment_Results").sheet1
                     sheet.append_row([
                         get_ist_time().strftime("%Y-%m-%d %I:%M %p"),
-                        candidate_name, st.session_state.mobile, hr_name, team_name,
-                        f"{correct}/20"
+                        c_name, st.session_state.mobile, h_name, t_name, f"{score}/20"
                     ])
-                    st.success("✅ Submitted Successfully!")
+                    st.success(f"✅ Submitted! Score: {score}/20")
                     st.balloons()
-                    st.session_state.logged_in = False # Logout
+                    st.session_state.logged_in = False
                 except Exception as e:
-                    st.error(f"Error saving: {e}")
+                    st.error(f"Error: {e}")
