@@ -5,13 +5,6 @@ from datetime import datetime
 import random
 import os
 
-import streamlit as st
-import os
-import random
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
-from datetime import datetime
-
 # ---------------- SESSION INIT ----------------
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
@@ -23,16 +16,12 @@ if "mobile" not in st.session_state:
     st.session_state.mobile = ""
 if "otp_time" not in st.session_state:
     st.session_state.otp_time = None
-
-# ✅ NEW (IMPORTANT)
 if "user_logged" not in st.session_state:
     st.session_state.user_logged = None
-
-# ✅ Activity tracker
 if "last_activity" not in st.session_state:
     st.session_state.last_activity = datetime.now()
 
-# ✅ logout function
+# Logout Function
 def logout():
     st.session_state.logged_in = False
     st.session_state.otp_sent = False
@@ -42,300 +31,188 @@ def logout():
     st.session_state.current_q = 0
     st.session_state.user_logged = None
 
-
+# Page Config
 if not st.session_state.get("logged_in", False):
     st.set_page_config(page_title="SPAY INDIA", layout="centered")
 else:
     st.set_page_config(page_title="SPAY INDIA", layout="wide")
 
-
-# ================= LOGIN =================
-if not st.session_state.get("logged_in", False) or st.session_state.user_logged != st.session_state.mobile:
-
-    st.markdown("""
-    <style>
+# ---------------- GLOBAL CSS (FOR BOTH PAGES) ----------------
+st.markdown("""
+<style>
     header {visibility: hidden;}
-    .block-container {
-        padding-top: 6rem !important;
-    }
-
     .stApp { background-color: #f5f7fb; }
-
-    .title { 
-        font-size: 42px; 
-        font-weight: bold; 
-        color: #1a237e; 
-        text-align: center; 
-    }
-
-    .subtitle { 
-        text-align: center; 
-        color: black; 
-        margin-bottom: 40px; 
-    }
-
-    .input-label {
-        font-weight: bold;
-        margin-top: 10px;
-    }
-
+    
+    /* बटन की बेस स्टाइल (Solid Blue) */
     div.stButton > button {
-        background: linear-gradient(90deg, #ff007a, #a020f0);
-        color: white;
-        border-radius: 10px;
-        height: 60px;
-        font-weight: bold;
+        background-color: #1a237e !important;   /* गहरा नीला */
+        color: white !important;                /* सफेद टेक्स्ट */
+        font-weight: bold !important;
+        border-radius: 8px !important;
+        height: 50px !important;
+        border: none !important;
+        opacity: 1 !important;                  /* धुंधला होने से रोकेगा */
+        transition: none !important;            /* एनीमेशन बंद */
     }
-    </style>
-    """, unsafe_allow_html=True)
 
+    /* माउस ले जाने (Hover) और क्लिक करने पर बदलाव नहीं होगा */
+    div.stButton > button:hover, 
+    div.stButton > button:active, 
+    div.stButton > button:focus {
+        background-color: #1a237e !important;
+        color: white !important;
+        opacity: 1 !important;
+        border: none !important;
+        box-shadow: none !important;
+        outline: none !important;
+    }
+
+    .header-container {
+        width: 100%; margin-top: 10px; height: 110px;
+        background: linear-gradient(to right, #1a237e, #4caf50, #fbc02d);
+        display: flex; justify-content: center; align-items: center;
+        color: white; border-radius: 10px; flex-direction: column;
+    }
+    .header-title { font-size: 42px; font-weight: bold; }
+    .header-subtitle { font-size: 15px; font-weight: bold; }
+    .input-label { font-weight: bold; margin-top: 10px; }
+</style>
+""", unsafe_allow_html=True)
+
+# ================= LOGIN PAGE =================
+if not st.session_state.get("logged_in", False) or st.session_state.user_logged != st.session_state.mobile:
+    
     col1, col2 = st.columns([1.2,1])
 
     with col1:
-        img = r"D:\Work Folder\interview_boy.png"
-        if os.path.exists(img):
-            st.image(img, width=320)
+        # GitHub पर इमेज लोड करने के लिए सिर्फ फाइल का नाम दें
+        img_filename = "interview_boy.png" 
+        if os.path.exists(img_filename):
+            st.image(img_filename, width=320)
+        else:
+            st.info("Logo Placeholder (Upload image to GitHub)")
 
     with col2:
-
-        st.markdown('<div class="title">SPAY INDIA</div>', unsafe_allow_html=True)
-        st.markdown('<div class="subtitle">Candidate Portal</div>', unsafe_allow_html=True)
+        st.markdown('<div style="font-size: 42px; font-weight: bold; color: #1a237e; text-align: center;">SPAY INDIA</div>', unsafe_allow_html=True)
+        st.markdown('<div style="text-align: center; color: black; margin-bottom: 40px;">Candidate Portal</div>', unsafe_allow_html=True)
 
         st.markdown('<div class="input-label">Mobile Number</div>', unsafe_allow_html=True)
-        mobile = st.text_input("", placeholder="Write your mobile number", label_visibility="collapsed")
+        mobile = st.text_input("", placeholder="Write your mobile number", label_visibility="collapsed", key="login_mobile")
 
         st.markdown('<div class="input-label">Enter OTP</div>', unsafe_allow_html=True)
-        otp_input = st.text_input("", placeholder="Enter OTP", label_visibility="collapsed")
+        otp_input = st.text_input("", placeholder="Enter OTP", label_visibility="collapsed", key="login_otp")
 
-        if not st.session_state.otp_sent:
-            clicked = st.button("SEND OTP", use_container_width=True)
-        else:
-            clicked = st.button("VERIFY OTP", use_container_width=True)
+        btn_text = "VERIFY OTP" if st.session_state.otp_sent else "SEND OTP"
+        clicked = st.button(btn_text, use_container_width=True)
 
         msg = st.empty()
 
         if clicked:
-
             if not st.session_state.otp_sent:
-
                 if mobile and len(mobile)==10 and mobile.isdigit():
-
                     otp = str(random.randint(100000,999999))
-
                     st.session_state.otp = otp
                     st.session_state.mobile = mobile
                     st.session_state.otp_sent = True
                     st.session_state.otp_time = datetime.now()
-
+                    
+                    # Google Sheets Connect
                     try:
                         scope = ["https://spreadsheets.google.com/feeds","https://www.googleapis.com/auth/drive"]
-                        creds = ServiceAccountCredentials.from_json_keyfile_name(creds_dict, scope)
+                        # GitHub/Streamlit Cloud के लिए Secrets इस्तेमाल करें
+                        creds = ServiceAccountCredentials.from_json_keyfile_dict(st.secrets["gcp_service_account"], scope)
                         client = gspread.authorize(creds)
-
                         sheet = client.open("Assessment_Results").get_worksheet(1)
-
-                        sheet.append_row([
-                            datetime.now().strftime("%Y-%m-%d %H:%M"),
-                            mobile,
-                            otp
-                        ])
+                        sheet.append_row([datetime.now().strftime("%Y-%m-%d %H:%M"), mobile, otp])
+                        msg.success(f"✅ OTP Sent (For testing: {otp})")
+                        st.rerun()
                     except Exception as e:
                         msg.error(f"Sheet Error: {e}")
-
-                    msg.success("✅ OTP Sent Successfully")
-                    st.rerun()
-
                 else:
                     msg.error("❌ Invalid Mobile Number")
-
             else:
-
                 if otp_input == st.session_state.otp:
-
                     if (datetime.now() - st.session_state.otp_time).total_seconds() > 600:
                         msg.error("⏰ OTP Expired")
                     else:
                         st.session_state.last_activity = datetime.now()
                         st.session_state.logged_in = True
-
-                        # ✅ MAIN FIX (LOGIN LOCK)
                         st.session_state.user_logged = st.session_state.mobile
-
                         st.rerun()
-
                 else:
                     msg.error("❌ Wrong OTP")
-
     st.stop()
-# ================= TEST =================
 
-# ⏰ AUTO LOGOUT CHECK (ONLY AFTER LOGIN PAGE)
-if st.session_state.logged_in:
-    now = datetime.now()
-    diff = (now - st.session_state.last_activity).total_seconds()
+# ================= TEST PAGE (AFTER LOGIN) =================
 
-    if diff > 300:  # 5 minutes
-        logout()
-        st.warning("Session expired due to inactivity")
-        st.rerun()
-    else:
-        # ✅ refresh pe bhi session active rahe
-        st.session_state.last_activity = now
+# Auto Logout Check
+now = datetime.now()
+if (now - st.session_state.last_activity).total_seconds() > 300:
+    logout()
+    st.rerun()
+else:
+    st.session_state.last_activity = now
 
 st.markdown("""
-<style>
-.block-container { padding-top: 2rem; }
-div.stButton > button {
-    background-color: #1a237e; color: white; font-weight: bold;
-    border-radius: 6px; height: 45px; border: none;
-}
-.header-container {
-    width: 100%; margin-top: 30px; height: 110px;
-    background: linear-gradient(to right, #1a237e, #4caf50, #fbc02d);
-    display: flex; justify-content: center; align-items: center;
-    color: white; border-radius: 10px; flex-direction: column;
-}
-.header-title { font-size: 42px; font-weight: bold; }
-.header-subtitle { font-size: 15px; font-weight: bold; }
-            
-
-
-/* 1. बटन की बेस स्टाइल (Normal State) */
-div.stButton > button {
-    background-color: #1a237e !important;   /* गहरा नीला */
-    color: white !important;                /* सफेद टेक्स्ट */
-    font-weight: bold !important;
-    border-radius: 8px !important;
-    height: 50px !important;
-    border: none !important;
-    opacity: 1 !important;                  /* हल्का दिखने से रोकने के लिए */
-    transition: none !important;            /* कोई भी एनीमेशन बंद */
-}
-
-/* 2. माउस ले जाने पर (Hover State) - यहाँ रंग हल्का नहीं होगा */
-div.stButton > button:hover {
-    background-color: #1a237e !important;   /* सेम वही नीला रंग */
-    color: white !important;
-    opacity: 1 !important;                  /* यहाँ 1 रखने से धुंधला नहीं दिखेगा */
-    border: none !important;
-}
-
-/* 3. बटन दबाते समय (Active/Click State) */
-div.stButton > button:active, 
-div.stButton > button:focus {
-    background-color: #1a237e !important;   /* सेम वही नीला रंग */
-    color: white !important;
-    box-shadow: none !important;
-    outline: none !important;
-}
-
-/* हेडर स्टाइल */
-.header-container {
-    width: 100%; margin-top: 30px; height: 110px;
-    background: linear-gradient(to right, #1a237e, #4caf50, #fbc02d);
-    display: flex; justify-content: center; align-items: center;
-    color: white; border-radius: 10px; flex-direction: column;
-}
-.header-title { font-size: 42px; font-weight: bold; }
-.header-subtitle { font-size: 15px; font-weight: bold; }
-                   
-</style>
-
 <div class="header-container">
     <div class="header-title">SPAY INDIA</div>
     <div class="header-subtitle">SKILL ASSESSMENT TEST</div>
 </div>
 """, unsafe_allow_html=True)
 
-# QUESTIONS (same full set)
+# Questions Logic
 questions = [
     {"q":"She ___ to the office every day.","options":["go","goes","going","gone"],"cor":"goes","cat":"English"},
     {"q":"Opposite of success?","options":["failure","win","achieve","progress"],"cor":"failure","cat":"English"},
-    {"q":"Synonym of fast?","options":["slow","quick","delay","lazy"],"cor":"quick","cat":"English"},
-    {"q":"He speaks English ___ than his brother.","options":["good","better","best","well"],"cor":"better","cat":"English"},
-
     {"q":"25% of 200 = ?","options":["40","45","50","55"],"cor":"50","cat":"Math"},
-    {"q":"15% of 200 = ?","options":["20","25","30","35"],"cor":"30","cat":"Math"},
-    {"q":"30% of 600 = ?","options":["160","180","200","220"],"cor":"180","cat":"Math"},
     {"q":"20% of 500 = ?","options":["80","90","100","110"],"cor":"100","cat":"Math"},
 ]
 
-# RANDOM 10+10
 if "questions_set" not in st.session_state or st.session_state.get("questions_user") != st.session_state.mobile:
-
-    eng = [q for q in questions if q["cat"]=="English"]
-    math = [q for q in questions if q["cat"]=="Math"]
-
-    # 10 English + 10 Math (agar utne available ho)
-    eng_sample = random.sample(eng, min(10, len(eng)))
-    math_sample = random.sample(math, min(10, len(math)))
-
-    st.session_state.questions_set = eng_sample + math_sample
-    
-
+    st.session_state.questions_set = random.sample(questions, min(10, len(questions)))
     st.session_state.answers = [""] * len(st.session_state.questions_set)
     st.session_state.current_q = 0
-
-    # 🔥 Lock questions to user
     st.session_state.questions_user = st.session_state.mobile
 
-# USER FORM (RESTORED)
+# User Form
 col1, col2 = st.columns(2)
-
 with col1:
-    st.markdown('<div class="input-label">Candidate Name</div>', unsafe_allow_html=True)
-    name = st.text_input("", placeholder="Enter your name", label_visibility="collapsed")
-    mobile_field = st.text_input("**Mobile No**", value=st.session_state.mobile)
-
+    name = st.text_input("Candidate Name", placeholder="Enter your name")
+    mobile_field = st.text_input("Mobile No", value=st.session_state.mobile, disabled=True)
 with col2:
-    st.markdown('<div class="input-label">HR Name</div>', unsafe_allow_html=True)
-    hr = st.text_input("", placeholder="Enter HR name", label_visibility="collapsed")
+    hr = st.text_input("HR Name", placeholder="Enter HR name")
+    team = st.text_input("Interview Team", placeholder="Enter team name")
 
-    st.markdown('<div class="input-label">Interview Team</div>', unsafe_allow_html=True)
-    team = st.text_input("", placeholder="Enter team name", label_visibility="collapsed")
-
-    
-    
 st.divider()
 
-# QUESTION
+# Question Display
 q_index = st.session_state.current_q
 q = st.session_state.questions_set[q_index]
 
 st.markdown(f"### QUESTION {q_index+1} / {len(st.session_state.questions_set)}")
-st.markdown(
-    f"<div style='color:#0d47a1; font-weight:bold; font-size:22px;'>{q['q']}</div>",
-    unsafe_allow_html=True
-)
+st.markdown(f"<div style='color:#0d47a1; font-weight:bold; font-size:22px;'>{q['q']}</div>", unsafe_allow_html=True)
 
-ans = st.radio("", q["options"], key=f"q_{q_index}")
+ans = st.radio("Choose Option:", q["options"], key=f"q_{q_index}")
 st.session_state.answers[q_index] = ans
 
-col1,col2 = st.columns(2)
+col_next, col_submit = st.columns(2)
 
-with col1:
-    if st.button("NEXT →", use_container_width=True):
-        st.session_state.last_activity = datetime.now()
+with col_next:
     if q_index < len(st.session_state.questions_set)-1:
-        st.session_state.current_q += 1
-        st.rerun()
+        if st.button("NEXT →", use_container_width=True):
+            st.session_state.current_q += 1
+            st.session_state.last_activity = datetime.now()
+            st.rerun()
 
-with col2:
+with col_submit:
     if st.button("SUBMIT TEST", use_container_width=True):
-        st.session_state.last_activity = datetime.now()
-
-        correct = sum(1 for i,q in enumerate(st.session_state.questions_set)
-                      if st.session_state.answers[i]==q["cor"])
-
-        scope = ["https://spreadsheets.google.com/feeds","https://www.googleapis.com/auth/drive"]
-        creds = ServiceAccountCredentials.from_json_keyfile_name(creds_dict, scope)
-        client = gspread.authorize(creds)
-
-        sheet = client.open("Assessment_Results").sheet1
-        sheet.append_row([
-            datetime.now().strftime("%Y-%m-%d %H:%M"),
-            name,mobile_field,hr,team,
-            f"{correct}/{len(st.session_state.questions_set)}"
-        ])
-
-        st.success("Test Submitted Successfully")
+        correct = sum(1 for i,ques in enumerate(st.session_state.questions_set) if st.session_state.answers[i]==ques["cor"])
+        try:
+            creds = ServiceAccountCredentials.from_json_keyfile_dict(st.secrets["gcp_service_account"], ["https://spreadsheets.google.com/feeds","https://www.googleapis.com/auth/drive"])
+            client = gspread.authorize(creds)
+            sheet = client.open("Assessment_Results").sheet1
+            sheet.append_row([datetime.now().strftime("%Y-%m-%d %H:%M"), name, mobile_field, hr, team, f"{correct}/{len(st.session_state.questions_set)}"])
+            st.success("✅ Test Submitted Successfully!")
+            st.balloons()
+        except Exception as e:
+            st.error(f"Error: {e}")
