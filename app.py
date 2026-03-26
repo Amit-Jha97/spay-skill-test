@@ -93,8 +93,8 @@ if not st.session_state.get("logged_in", False) or st.session_state.user_logged 
 
     with col1:
         img_url = "https://github.com/Amit-Jha97/spay-skill-test/blob/main/interview_boy.png?raw=true"
-        if os.path.exists(img):
-            st.image(img, width=320)
+        if os.path.exists(img_url):
+            st.image(img_url, width=320)
 
     with col2:
 
@@ -200,49 +200,47 @@ div.stButton > button {
             
 
 
-/* लॉगिन बटन (Blue Style) */
+/* 1. बटन की बेस स्टाइल (Normal State) */
 div.stButton > button {
-    background-color: #1a237e !important;
+    background-color: #1a237e !important;   /* गहरा नीला */
+    color: white !important;                /* सफेद टेक्स्ट */
+    font-weight: bold !important;
+    border-radius: 8px !important;
+    height: 50px !important;
+    border: none !important;
+    opacity: 1 !important;                  /* हल्का दिखने से रोकने के लिए */
+    transition: none !important;            /* कोई भी एनीमेशन बंद */
+}
+
+/* 2. माउस ले जाने पर (Hover State) - यहाँ रंग हल्का नहीं होगा */
+div.stButton > button:hover {
+    background-color: #1a237e !important;   /* सेम वही नीला रंग */
     color: white !important;
-    border-radius: 10px;
-    height: 60px;
-    font-weight: bold;
+    opacity: 1 !important;                  /* यहाँ 1 रखने से धुंधला नहीं दिखेगा */
     border: none !important;
 }
 
-/* माउस ले जाने (Hover) और क्लिक करने पर भी नीला ही रहेगा */
-div.stButton > button:hover, 
+/* 3. बटन दबाते समय (Active/Click State) */
 div.stButton > button:active, 
 div.stButton > button:focus {
-    background-color: #1a237e !important;
+    background-color: #1a237e !important;   /* सेम वही नीला रंग */
     color: white !important;
-    border: none !important;
     box-shadow: none !important;
     outline: none !important;
 }
 
-/* टेस्ट के बटन (Blue Style) */
-div.stButton > button {
-    background-color: #1a237e !important; 
-    color: white !important;
-    font-weight: bold;
-    border-radius: 6px;
-    height: 45px;
-    border: none !important;
+/* हेडर स्टाइल */
+.header-container {
+    width: 100%; margin-top: 30px; height: 110px;
+    background: linear-gradient(to right, #1a237e, #4caf50, #fbc02d);
+    display: flex; justify-content: center; align-items: center;
+    color: white; border-radius: 10px; flex-direction: column;
 }
-
-/* Hover/Active/Focus होने पर भी नीला और सफेद ही रहेगा */
-div.stButton > button:hover, 
-div.stButton > button:active, 
-div.stButton > button:focus {
-    background-color: #1a237e !important;
-    color: white !important;
-    border: none !important;
-    box-shadow: none !important;
-    outline: none !important;
-}
+.header-title { font-size: 42px; font-weight: bold; }
+.header-subtitle { font-size: 15px; font-weight: bold; }
                    
 </style>
+
 <div class="header-container">
     <div class="header-title">SPAY INDIA</div>
     <div class="header-subtitle">SKILL ASSESSMENT TEST</div>
