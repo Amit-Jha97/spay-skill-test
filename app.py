@@ -50,7 +50,7 @@ st.markdown("""
         color: white !important;
         font-weight: bold !important;
         border-radius: 8px !important;
-        height: 50px !important;
+        height: 40px !important;
         border: none !important;
         opacity: 1 !important;
         transition: none !important;
@@ -62,7 +62,7 @@ st.markdown("""
     }
 
     .header-container {
-        width: 100%; margin-top: 30px; height: 110px;
+        width: 100%; margin-top: 30px; height: 90px;
         background: linear-gradient(to right, #1a237e, #4caf50, #fbc02d);
         display: flex; justify-content: center; align-items: center;
         color: white; border-radius: 10px; flex-direction: column;
