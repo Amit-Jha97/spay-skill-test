@@ -1,23 +1,24 @@
 import streamlit as st
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
-from datetime import datetime
+from datetime import datetime, timedelta
 import random
 import os
 
+# --- TIMEZONE HELPER (IST) ---
+def get_ist_time():
+    # Streamlit server UTC use karta hai, India ke liye 5:30 ghante add karne honge
+    return datetime.now() + timedelta(hours=5, minutes=30)
+
 # --- GOOGLE SHEETS CONNECTION (SAFE) ---
-# Is function ko app.py mein update karein
 def get_gspread_client():
     try:
         creds_dict = st.secrets["gcp_service_account"]
         scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-        
-        # Dict se credentials create karein
         creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
         client = gspread.authorize(creds)
         return client
     except Exception as e:
-        # Agar connection temporary fail ho, to error yahan dikhega
         st.error(f"Google Connection Error: {e}")
         return None
 
@@ -35,16 +36,12 @@ if "otp_time" not in st.session_state:
 if "user_logged" not in st.session_state:
     st.session_state.user_logged = None
 if "last_activity" not in st.session_state:
-    st.session_state.last_activity = datetime.now()
+    st.session_state.last_activity = get_ist_time()
 
 def logout():
-    st.session_state.logged_in = False
-    st.session_state.otp_sent = False
-    st.session_state.questions_set = None
-    st.session_state.questions_user = None
-    st.session_state.answers = []
-    st.session_state.current_q = 0
-    st.session_state.user_logged = None
+    for key in list(st.session_state.keys()):
+        del st.session_state[key]
+    st.rerun()
 
 # Page Config
 if not st.session_state.get("logged_in", False):
@@ -52,28 +49,49 @@ if not st.session_state.get("logged_in", False):
 else:
     st.set_page_config(page_title="SPAY INDIA", layout="wide")
 
-# ================= LOGIN PAGE (With Original Formatting) =================
-if not st.session_state.get("logged_in", False) or st.session_state.user_logged != st.session_state.mobile:
-
-    st.markdown("""
-    <style>
-    header {visibility: hidden;}
-    .block-container { padding-top: 6rem !important; }
+# ================= GLOBAL STYLES (Hide UI & Fix Buttons) =================
+st.markdown("""
+<style>
+    /* Hide Streamlit Header, Footer and Deploy Button */
+    header {visibility: hidden !important;}
+    footer {visibility: hidden !important;}
+    #MainMenu {visibility: hidden !important;}
+    .stDeployButton {display:none !important;}
+    
+    /* Global Background */
     .stApp { background-color: #f5f7fb; }
+
+    /* Button Styling & Hover Fix */
+    div.stButton > button {
+        background: linear-gradient(90deg, #ff007a, #a020f0) !important;
+        color: white !important;
+        border-radius: 10px !important;
+        height: 60px !important;
+        font-weight: bold !important;
+        border: none !important;
+        transition: none !important;
+    }
+    
+    div.stButton > button:hover {
+        opacity: 1 !important; /* Dimming effect hata diya */
+        background: linear-gradient(90deg, #ff007a, #a020f0) !important;
+        color: white !important;
+        border: none !important;
+    }
+
     .title { font-size: 42px; font-weight: bold; color: #1a237e; text-align: center; }
     .subtitle { text-align: center; color: black; margin-bottom: 40px; }
     .input-label { font-weight: bold; margin-top: 10px; }
-    div.stButton > button {
-        background: linear-gradient(90deg, #ff007a, #a020f0);
-        color: white; border-radius: 10px; height: 60px; font-weight: bold;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+</style>
+""", unsafe_allow_html=True)
 
+# ================= LOGIN PAGE =================
+if not st.session_state.get("logged_in", False) or st.session_state.user_logged != st.session_state.mobile:
+
+    st.markdown('<div style="padding-top: 2rem;"></div>', unsafe_allow_html=True)
     col1, col2 = st.columns([1.2,1])
 
     with col1:
-        # ✅ GitHub Direct Image Link
         img_url = "https://github.com/Amit-Jha97/spay-skill-test/blob/main/interview_boy.png?raw=true"
         st.image(img_url, width=320)
 
@@ -101,13 +119,13 @@ if not st.session_state.get("logged_in", False) or st.session_state.user_logged 
                     st.session_state.otp = otp
                     st.session_state.mobile = mobile
                     st.session_state.otp_sent = True
-                    st.session_state.otp_time = datetime.now()
+                    st.session_state.otp_time = get_ist_time()
 
                     client = get_gspread_client()
                     if client:
                         try:
                             sheet = client.open("Assessment_Results").get_worksheet(1)
-                            sheet.append_row([datetime.now().strftime("%Y-%m-%d %H:%M"), mobile, otp])
+                            sheet.append_row([get_ist_time().strftime("%Y-%m-%d %I:%M %p"), mobile, otp])
                             msg.success("✅ OTP Sent Successfully")
                             st.rerun()
                         except Exception as e:
@@ -116,10 +134,10 @@ if not st.session_state.get("logged_in", False) or st.session_state.user_logged 
                     msg.error("❌ Invalid Mobile Number")
             else:
                 if otp_input == st.session_state.otp:
-                    if (datetime.now() - st.session_state.otp_time).total_seconds() > 600:
+                    if (get_ist_time() - st.session_state.otp_time).total_seconds() > 600:
                         msg.error("⏰ OTP Expired")
                     else:
-                        st.session_state.last_activity = datetime.now()
+                        st.session_state.last_activity = get_ist_time()
                         st.session_state.logged_in = True
                         st.session_state.user_logged = st.session_state.mobile
                         st.rerun()
@@ -127,28 +145,22 @@ if not st.session_state.get("logged_in", False) or st.session_state.user_logged 
                     msg.error("❌ Wrong OTP")
     st.stop()
 
-# ================= TEST PAGE (Original Formatting) =================
+# ================= TEST PAGE =================
 
-# Auto Logout Check
+# Auto Logout Check (5 Minutes)
 if st.session_state.logged_in:
-    now = datetime.now()
+    now = get_ist_time()
     diff = (now - st.session_state.last_activity).total_seconds()
     if diff > 300:
         logout()
-        st.warning("Session expired due to inactivity")
         st.rerun()
     else:
         st.session_state.last_activity = now
 
 st.markdown("""
 <style>
-.block-container { padding-top: 2rem; }
-div.stButton > button {
-    background-color: #1a237e; color: white; font-weight: bold;
-    border-radius: 6px; height: 45px; border: none;
-}
 .header-container {
-    width: 100%; margin-top: 30px; height: 110px;
+    width: 100%; margin-top: 10px; height: 110px;
     background: linear-gradient(to right, #1a237e, #4caf50, #fbc02d);
     display: flex; justify-content: center; align-items: center;
     color: white; border-radius: 10px; flex-direction: column;
@@ -163,7 +175,7 @@ div.stButton > button {
 </div>
 """, unsafe_allow_html=True)
 
-# QUESTIONS SET (Original)
+# QUESTIONS
 questions = [
     {"q":"She ___ to the office every day.","options":["go","goes","going","gone"],"cor":"goes","cat":"English"},
     {"q":"Opposite of success?","options":["failure","win","achieve","progress"],"cor":"failure","cat":"English"},
@@ -195,7 +207,7 @@ with col2:
 
 st.divider()
 
-# QUIZ DISPLAY
+# DISPLAY
 q_index = st.session_state.current_q
 q = st.session_state.questions_set[q_index]
 
@@ -205,26 +217,29 @@ st.markdown(f"<div style='color:#0d47a1; font-weight:bold; font-size:22px;'>{q['
 ans = st.radio("", q["options"], key=f"q_{q_index}")
 st.session_state.answers[q_index] = ans
 
-col1, col2 = st.columns(2)
-with col1:
+col_n1, col_n2 = st.columns(2)
+with col_n1:
     if st.button("NEXT →", use_container_width=True):
-        st.session_state.last_activity = datetime.now()
+        st.session_state.last_activity = get_ist_time()
         if q_index < len(st.session_state.questions_set)-1:
             st.session_state.current_q += 1
             st.rerun()
 
-with col2:
+with col_n2:
     if st.button("SUBMIT TEST", use_container_width=True):
-        st.session_state.last_activity = datetime.now()
+        st.session_state.last_activity = get_ist_time()
         correct = sum(1 for i,q in enumerate(st.session_state.questions_set) if st.session_state.answers[i]==q["cor"])
         
         client = get_gspread_client()
         if client:
-            sheet = client.open("Assessment_Results").sheet1
-            sheet.append_row([
-                datetime.now().strftime("%Y-%m-%d %H:%M"),
-                name, mobile_field, hr, team,
-                f"{correct}/{len(st.session_state.questions_set)}"
-            ])
-            st.success("✅ Test Submitted Successfully")
-            st.balloons()
+            try:
+                sheet = client.open("Assessment_Results").sheet1
+                sheet.append_row([
+                    get_ist_time().strftime("%Y-%m-%d %I:%M %p"),
+                    name, mobile_field, hr, team,
+                    f"{correct}/{len(st.session_state.questions_set)}"
+                ])
+                st.success("✅ Test Submitted Successfully!")
+                st.balloons()
+            except Exception as e:
+                st.error(f"Error saving results: {e}")
