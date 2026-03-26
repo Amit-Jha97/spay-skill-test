@@ -93,8 +93,8 @@ if not st.session_state.get("logged_in", False) or st.session_state.user_logged 
 
     with col1:
         img_url = "https://github.com/Amit-Jha97/spay-skill-test/blob/main/interview_boy.png?raw=true"
-        if os.path.exists(img_url):
-            st.image(img_url, width=320)
+        if os.path.exists(img):
+            st.image(img, width=320)
 
     with col2:
 
