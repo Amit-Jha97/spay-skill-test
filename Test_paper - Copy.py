@@ -92,7 +92,8 @@ if not st.session_state.get("logged_in", False) or st.session_state.user_logged 
     col1, col2 = st.columns([1.2,1])
 
     with col1:
-        img = r"D:\Work Folder\interview_boy.png"
+        
+        image_url = "https://github.com/Amit-Jha97/spay-skill-test/blob/main/interview_boy.png?raw=true"
         if os.path.exists(img):
             st.image(img, width=320)
 
@@ -129,8 +130,7 @@ if not st.session_state.get("logged_in", False) or st.session_state.user_logged 
 
                     try:
                         scope = ["https://spreadsheets.google.com/feeds","https://www.googleapis.com/auth/drive"]
-                        creds = ServiceAccountCredentials.from_json_keyfile_name(
-                            r"D:\Work Folder\creds.json.json", scope)
+                        creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
                         client = gspread.authorize(creds)
 
                         sheet = client.open("Assessment_Results").get_worksheet(1)
@@ -287,7 +287,7 @@ with col2:
                       if st.session_state.answers[i]==q["cor"])
 
         scope = ["https://spreadsheets.google.com/feeds","https://www.googleapis.com/auth/drive"]
-        creds = ServiceAccountCredentials.from_json_keyfile_name(r"D:\Work Folder\creds.json.json", scope)
+        creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
         client = gspread.authorize(creds)
 
         sheet = client.open("Assessment_Results").sheet1
