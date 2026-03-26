@@ -6,14 +6,19 @@ import random
 import os
 
 # --- GOOGLE SHEETS CONNECTION (SAFE) ---
+# Is function ko app.py mein update karein
 def get_gspread_client():
     try:
         creds_dict = st.secrets["gcp_service_account"]
-        scope = ["https://spreadsheets.google.com/feeds","https://www.googleapis.com/auth/drive"]
+        scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+        
+        # Dict se credentials create karein
         creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
-        return gspread.authorize(creds)
+        client = gspread.authorize(creds)
+        return client
     except Exception as e:
-        st.error(f"Sheet Connection Error: {e}")
+        # Agar connection temporary fail ho, to error yahan dikhega
+        st.error(f"Google Connection Error: {e}")
         return None
 
 # ---------------- SESSION INIT ----------------
