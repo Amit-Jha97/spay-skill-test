@@ -197,8 +197,52 @@ div.stButton > button {
 }
 .header-title { font-size: 42px; font-weight: bold; }
 .header-subtitle { font-size: 15px; font-weight: bold; }
-</style>
+            
 
+
+/* लॉगिन बटन (Blue Style) */
+div.stButton > button {
+    background-color: #1a237e !important;
+    color: white !important;
+    border-radius: 10px;
+    height: 60px;
+    font-weight: bold;
+    border: none !important;
+}
+
+/* माउस ले जाने (Hover) और क्लिक करने पर भी नीला ही रहेगा */
+div.stButton > button:hover, 
+div.stButton > button:active, 
+div.stButton > button:focus {
+    background-color: #1a237e !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+/* टेस्ट के बटन (Blue Style) */
+div.stButton > button {
+    background-color: #1a237e !important; 
+    color: white !important;
+    font-weight: bold;
+    border-radius: 6px;
+    height: 45px;
+    border: none !important;
+}
+
+/* Hover/Active/Focus होने पर भी नीला और सफेद ही रहेगा */
+div.stButton > button:hover, 
+div.stButton > button:active, 
+div.stButton > button:focus {
+    background-color: #1a237e !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+                   
+</style>
 <div class="header-container">
     <div class="header-title">SPAY INDIA</div>
     <div class="header-subtitle">SKILL ASSESSMENT TEST</div>
