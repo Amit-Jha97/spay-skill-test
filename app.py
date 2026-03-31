@@ -266,19 +266,6 @@ st.markdown(f"""
 curr = st.session_state.current_q
 q = st.session_state.questions_set[curr]
 
-# 1. Question Number
-st.markdown(f"""
-    <div style='font-size: 14px; color: gray; margin-top: -35px; margin-bottom: 2px;'>
-        Question {curr+1} / {len(st.session_state.questions_set)} ({q['cat']})
-    </div>
-    """, unsafe_allow_html=True)
-
-# 2. Main Question
-st.markdown(f"""
-    <div class="adaptive-question">
-        {q['q']}
-    </div>
-    """, unsafe_allow_html=True)
 
 # 3. Radio Buttons (YE WAPAS ADD KIYA HAI)
 # label_visibility="collapsed" rakha hai taaki extra space na le
