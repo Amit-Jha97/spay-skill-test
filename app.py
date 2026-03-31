@@ -40,7 +40,6 @@ if not st.session_state.get("logged_in", False):
 else:
     st.set_page_config(page_title="SPAY INDIA", layout="wide")
 
-# ---------------- GLOBAL CSS (Solid Blue Buttons & IST Header) ----------------
 # ---------------- GLOBAL CSS (Adaptive Theme & Blue Radio Buttons) ----------------
 st.markdown("""
 <style>
@@ -111,7 +110,7 @@ if not st.session_state.get("logged_in", False):
     with col1:
         img_filename = "interview_boy.png" 
         if os.path.exists(img_filename):
-            st.image(img_filename, width=320)
+            st.image(img_filename, width=300)
 
     with col2:
         st.markdown('<div class="login-brand">SPAY INDIA</div>', unsafe_allow_html=True)
