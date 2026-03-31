@@ -44,7 +44,6 @@ st.markdown("""
     header {visibility: hidden;}
     .stApp { background-color: #f5f7fb; }
     
-    /* बटन स्टाइल - Solid Blue (No light color on hover) */
     div.stButton > button {
         background-color: #1a237e !important;
         color: white !important;
@@ -74,6 +73,11 @@ st.markdown("""
         border-radius: 5px; text-align: center; font-weight: bold; margin-bottom: 10px;
     }
     .input-label { font-weight: bold; margin-top: 10px; color: black; }
+    
+    /* Radio button styling for black theme */
+    span {
+        color: #1a237e !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
