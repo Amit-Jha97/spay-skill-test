@@ -44,6 +44,21 @@ else:
 st.markdown("""
 <style>
     header {visibility: hidden;}
+
+    /* 1. Page ke sabse upar ka extra space hatane ke liye */
+    .block-container {
+        padding-top: 1rem !important;
+        padding-bottom: 0rem !important;
+        margin-top: 0rem !important;
+    }
+
+    /* 2. Image aur Login Box ko thoda aur upar push karne ke liye */
+    [data-testid="stVerticalBlock"] {
+        gap: 0rem;
+    }
+
+    /* 3. Header hidden rakhein (Jo aapne pehle bhi kiya tha) */
+    header {visibility: hidden;}
     
     /* Input box text adjustment: Adapt to Streamlit Theme */
     div[data-baseweb="input"] input {
