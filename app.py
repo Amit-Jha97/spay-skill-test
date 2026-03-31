@@ -41,11 +41,23 @@ else:
     st.set_page_config(page_title="SPAY INDIA", layout="wide")
 
 # ---------------- GLOBAL CSS (Solid Blue Buttons & IST Header) ----------------
+# ---------------- GLOBAL CSS (Adaptive Theme & Blue Radio Buttons) ----------------
 st.markdown("""
 <style>
     header {visibility: hidden;}
-    .stApp { background-color: #f5f7fb; }
     
+    /* Input box text adjustment: Adapt to Streamlit Theme */
+    div[data-baseweb="input"] input {
+        color: inherit !important; /* Automatic: Black in light, White in dark */
+    }
+
+    /* Placeholder color to keep it readable */
+    div[data-baseweb="input"] input::placeholder {
+        color: #888888 !important;
+        opacity: 1 !important;
+    }
+
+    /* Solid Blue Buttons */
     div.stButton > button {
         background-color: #1a237e !important;
         color: white !important;
@@ -53,53 +65,41 @@ st.markdown("""
         border-radius: 8px !important;
         height: 40px !important;
         border: none !important;
-        opacity: 1 !important;
-        transition: none !important;
-    }
-    div.stButton > button:hover, div.stButton > button:active {
-        background-color: #1a237e !important;
-        opacity: 1 !important;
-        border: none !important;
     }
 
+    /* Radio Button (Options) Styling */
+    /* Text color for options */
+    div[data-testid="stMarkdownContainer"] p {
+        color: inherit;
+    }
+
+    /* Blue highlight for selected radio circle */
+    div[role="radiogroup"] label div[data-testid="stMarker"] {
+        background-color: #1a237e !important;
+        border-color: #1a237e !important;
+    }
+
+    /* Header styling */
     .header-container {
-        width: 100%; margin-top: 30px; height: 90px;
+        width: 100%; margin-top: 30px; height: 100px;
         background: linear-gradient(to right, #1a237e, #4caf50, #fbc02d);
         display: flex; justify-content: center; align-items: center;
         color: white; border-radius: 10px; flex-direction: column;
+        margin-bottom: 20px;
     }
-    .header-title { font-size: 42px; font-weight: bold; }
-    .header-subtitle { font-size: 15px; font-weight: bold; }
+    .header-title { font-size: 42px; font-weight: bold; color: white; }
+    .header-subtitle { font-size: 15px; font-weight: bold; color: white; }
+
     .warning-box {
         padding: 10px; background-color: #fff3cd; color: #856404;
         border-radius: 5px; text-align: center; font-weight: bold; margin-bottom: 10px;
     }
-    .input-label { font-weight: bold; margin-top: 10px; color: black; }
     
-    /* Radio button styling for black theme */
-    span {
-        color: #1a237e !important;
-    }
+    .input-label { font-weight: bold; margin-top: 10px; color: inherit; }
 
-    .login-title {
-        font-size: 42px;
-        font-weight: bold;
-        color: #1a237e !important;
-        text-align: center;
-    }    
-    .login-subtitle {
-        text-align: center;
-        color: #111827 !important;
-        margin-bottom: 40px;
-        font-weight: 600;
-    }
-    div[data-baseweb="input"] input {
-        color: #111827 !important;
-        -webkit-text-fill-color: #111827 !important;
-    }
-    div[data-baseweb="input"] input::placeholder {
-        color: #6b7280 !important;
-        opacity: 1 !important;
+    /* Login Page Title specifically for Blue color */
+    .login-brand {
+        font-size: 42px; font-weight: bold; color: #1a237e; text-align: center;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -114,9 +114,9 @@ if not st.session_state.get("logged_in", False):
             st.image(img_filename, width=320)
 
     with col2:
-        st.markdown('<div style="font-size: 42px; font-weight: bold; color: #1a237e; text-align: center;">SPAY INDIA</div>', unsafe_allow_html=True)
-        st.markdown('<div style="text-align: center; color: black; margin-bottom: 40px;">Candidate Portal</div>', unsafe_allow_html=True)
-
+        st.markdown('<div class="login-brand">SPAY INDIA</div>', unsafe_allow_html=True)
+        st.markdown('<div style="text-align: center; font-weight: 600; margin-bottom: 40px;">Candidate Portal</div>', unsafe_allow_html=True)
+    # ... baki ka code
         st.markdown('<div class="input-label">Mobile Number</div>', unsafe_allow_html=True)
         mobile_input = st.text_input("", placeholder="Write your mobile number", label_visibility="collapsed")
 
