@@ -263,31 +263,37 @@ st.markdown(f"""
     """, unsafe_allow_html=True)
 
 # 3. Radio Buttons (Options)
-st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True)
-ans = st.radio("Options:", q["options"], key=f"q_{curr}", label_visibility="collapsed")
-st.session_state.answers[curr] = ans = ans
+# --- NAVIGATION BUTTONS (NEXT & SUBMIT SIDE-BY-SIDE) ---
+st.markdown("<br>", unsafe_allow_html=True) # Thoda gap dene ke liye
+col_nav1, col_nav2 = st.columns(2)
 
-# Nav
-col_n, col_s = st.columns(2)
-with col_n:
-    if curr < len(st.session_state.questions_set) - 1:
+with col_nav1:
+    # NEXT Button: Sirf tab dikhega jab 20th question na ho
+    if curr < 19:
         if st.button("NEXT →", use_container_width=True):
             st.session_state.current_q += 1
             st.rerun()
-# --- Submit Button Section ---
-if not st.session_state.submitted:
-    if st.button("SUBMIT TEST", use_container_width=True):
-        # 1. Pehle Calculation karein
+    else:
+        # 20th Question par NEXT ki jagah khali jagah ya koi message
+        st.write("") 
+
+with col_nav2:
+    # SUBMIT Button: Hamesha dikhega par submit hone ke baad disable ho jayega
+    submit_disabled = st.session_state.submitted
+    button_text = "TEST SUBMITTED" if submit_disabled else "SUBMIT TEST"
+    
+    if st.button(button_text, use_container_width=True, disabled=submit_disabled):
+        # Calculation
         score = sum(1 for i, ques in enumerate(st.session_state.questions_set) if st.session_state.answers[i] == ques["cor"])
         
         try:
-            # 2. Google Sheet Connection (Har submit par fresh connect karein)
+            # Sheet Connection
             scope = ["https://spreadsheets.google.com/feeds","https://www.googleapis.com/auth/drive"]
             creds = ServiceAccountCredentials.from_json_keyfile_dict(st.secrets["gcp_service_account"], scope)
             client = gspread.authorize(creds)
-            sheet = client.open("Assessment_Results").sheet1 # Sheet check karein
+            sheet = client.open("Assessment_Results").sheet1
             
-            # 3. Data Append (Sahi variables ke sath)
+            # Data Saving
             sheet.append_row([
                 get_ist_time().strftime("%Y-%m-%d %H:%M"), 
                 name, 
@@ -297,14 +303,10 @@ if not st.session_state.submitted:
                 f"{score}/20"
             ])
             
-            # 4. Success hone par hi flag True karein
             st.session_state.submitted = True
-            st.success("✅ Test Submitted Successfully!")
+            st.success("✅ Results Saved!")
             st.balloons()
-            st.rerun() # Page refresh taaki button gayab ho jaye
+            st.rerun()
             
         except Exception as e:
-            st.error(f"❌ Error saving results: {e}. Please try again.")
-else:
-    st.warning("✅ You have already submitted the test.")
-    st.info("Results have been recorded. You can close this window.")
+            st.error(f"Save Error: {e}")
