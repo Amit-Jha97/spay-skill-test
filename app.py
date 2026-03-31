@@ -286,15 +286,13 @@ with col_nav1:
         # Akhri sawal par Next button ki jagah blank space
         st.write("") 
 
-with col_nav2:
-    # SUBMIT Button logic
-    submit_disabled = st.session_state.submitted
-    button_text = "TEST SUBMITTED" if submit_disabled else "SUBMIT TEST"
-    
-    if st.button(button_text, use_container_width=True, disabled=submit_disabled):
+# --- SUBMIT Button logic ---
+if not st.session_state.submitted:
+    if st.button("SUBMIT TEST", use_container_width=True):
         score = sum(1 for i, ques in enumerate(st.session_state.questions_set) if st.session_state.answers[i] == ques["cor"])
         
         try:
+            # 1. Google Sheets mein data save karein
             scope = ["https://spreadsheets.google.com/feeds","https://www.googleapis.com/auth/drive"]
             creds = ServiceAccountCredentials.from_json_keyfile_dict(st.secrets["gcp_service_account"], scope)
             client = gspread.authorize(creds)
@@ -304,15 +302,27 @@ with col_nav2:
                 get_ist_time().strftime("%Y-%m-%d %H:%M"), 
                 name, 
                 st.session_state.user_email, 
-                hr, # Aapne upar HR ki jagah Mobile input liya hai, ye usi ko save karega
+                hr, # Mobile number
                 team, 
                 f"{score}/20"
             ])
             
+            # 2. State badal kar rerun karein taaki Thank You screen trigger ho jaye
             st.session_state.submitted = True
-            st.success("✅ Results Saved!")
-            st.balloons()
             st.rerun()
             
         except Exception as e:
             st.error(f"Save Error: {e}")
+
+# --- THANK YOU SCREEN (Jab submitted True ho jaye) ---
+if st.session_state.submitted:
+    st.empty() # Purana content clear karne ke liye
+    st.markdown("""
+        <div style="text-align: center; padding: 40px; background-color: #e8f5e9; border-radius: 10px;">
+            <h1 style="color: #2e7d32;">Thank You!</h1>
+            <p style="font-size: 20px; color: #1b5e20;">Your test has been submitted successfully.</p>
+            <p>You can now close this window.</p>
+        </div>
+    """, unsafe_allow_html=True)
+    st.balloons()
+    st.stop() # Iske niche ka sara code (questions, forms) hide ho jayega
