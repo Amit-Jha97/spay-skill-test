@@ -5,6 +5,9 @@ from datetime import datetime
 import random
 import os
 import pytz
+import smtplib
+import time
+from email.message import EmailMessage
 
 # --- TIMEZONE SETUP ---
 def get_ist_time():
@@ -17,59 +20,43 @@ if "otp_sent" not in st.session_state:
     st.session_state.otp_sent = False
 if "otp" not in st.session_state:
     st.session_state.otp = ""
-if "mobile" not in st.session_state:
-    st.session_state.mobile = ""
+if "user_email" not in st.session_state:
+    st.session_state.user_email = ""
 if "otp_time" not in st.session_state:
     st.session_state.otp_time = None
-if "user_logged" not in st.session_state:
-    st.session_state.user_logged = None
-if "last_activity" not in st.session_state:
-    st.session_state.last_activity = get_ist_time()
 if "submitted" not in st.session_state:
     st.session_state.submitted = False
 
-def logout():
-    st.session_state.logged_in = False
-    st.session_state.otp_sent = False
-    st.session_state.user_logged = None
-    st.rerun()
+# --- EMAIL SENDER FUNCTION ---
+def send_email_otp(receiver_email, otp):
+    msg = EmailMessage()
+    msg.set_content(f"Your SPAY INDIA Skill Assessment OTP is: {otp}\n\nThis code is valid for 20 minutes.")
+    msg['Subject'] = 'Login OTP - SPAY INDIA'
+    msg['From'] = st.secrets["smtp_user"]
+    msg['To'] = receiver_email
+    try:
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login(st.secrets["smtp_user"], st.secrets["smtp_pass"])
+        server.send_message(msg)
+        server.quit()
+        return True
+    except Exception as e:
+        st.error(f"Email Error: {e}")
+        return False
 
 # Page Config
-if not st.session_state.get("logged_in", False):
-    st.set_page_config(page_title="SPAY INDIA", layout="centered")
-else:
-    st.set_page_config(page_title="SPAY INDIA", layout="wide")
+st.set_page_config(page_title="SPAY INDIA", layout="centered" if not st.session_state.logged_in else "wide")
 
-# ---------------- GLOBAL CSS (Adaptive Theme & Blue Radio Buttons) ----------------
+# ---------------- GLOBAL CSS (Exact Style & Adaptive Theme) ----------------
 st.markdown("""
 <style>
     header {visibility: hidden;}
-
-    /* 1. Page ke sabse upar ka extra space hatane ke liye */
-    .block-container {
-        padding-top: 1rem !important;
-        padding-bottom: 1rem !important;
-        margin-top: 1rem !important;
-    }
-
-    /* 2. Image aur Login Box ko thoda aur upar push karne ke liye */
-    [data-testid="stVerticalBlock"] {
-        gap: 1rem;
-    }
-
-    /* 3. Header hidden rakhein (Jo aapne pehle bhi kiya tha) */
-    header {visibility: hidden;}
+    .block-container { padding-top: 1rem !important; }
     
-    /* Input box text adjustment: Adapt to Streamlit Theme */
-    div[data-baseweb="input"] input {
-        color: inherit !important; /* Automatic: Black in light, White in dark */
-    }
-
-    /* Placeholder color to keep it readable */
-    div[data-baseweb="input"] input::placeholder {
-        color: #888888 !important;
-        opacity: 1 !important;
-    }
+    /* Input box text adjustment */
+    div[data-baseweb="input"] input { color: inherit !important; }
+    div[data-baseweb="input"] input::placeholder { color: #888888 !important; }
 
     /* Solid Blue Buttons */
     div.stButton > button {
@@ -81,13 +68,7 @@ st.markdown("""
         border: none !important;
     }
 
-    /* Radio Button (Options) Styling */
-    /* Text color for options */
-    div[data-testid="stMarkdownContainer"] p {
-        color: inherit;
-    }
-
-    /* Blue highlight for selected radio circle */
+    /* Radio Button Blue Marker */
     div[role="radiogroup"] label div[data-testid="stMarker"] {
         background-color: #1a237e !important;
         border-color: #1a237e !important;
@@ -95,7 +76,7 @@ st.markdown("""
 
     /* Header styling */
     .header-container {
-        width: 100%; margin-top: 30px; height: 100px;
+        width: 100%; margin-top: 10px; height: 100px;
         background: linear-gradient(to right, #1a237e, #4caf50, #fbc02d);
         display: flex; justify-content: center; align-items: center;
         color: white; border-radius: 10px; flex-direction: column;
@@ -110,70 +91,56 @@ st.markdown("""
     }
     
     .input-label { font-weight: bold; margin-top: 10px; color: inherit; }
+    .login-brand { font-size: 42px; font-weight: bold; color: #1a237e; text-align: center; }
 
-    /* Login Page Title specifically for Blue color */
-    .login-brand {
-        font-size: 42px; font-weight: bold; color: #1a237e; text-align: center;
-    }
+    /* Adaptive Question Logic */
+    .adaptive-question { font-weight: bold; font-size: 26px; line-height: 1.2; color: #1a237e; }
+    @media (prefers-color-scheme: dark) { .adaptive-question { color: #FFFFFF !important; } }
 </style>
 """, unsafe_allow_html=True)
 
-# ================= LOGIN PAGE (Original Layout) =================
+# ================= LOGIN PAGE =================
 if not st.session_state.get("logged_in", False):
-    col1, col2 = st.columns([1.2, 1])
-    
+    col1, col2 = st.columns([1.2, 1], gap="large")
     with col1:
-        img_filename = "interview_boy.png" 
-        if os.path.exists(img_filename):
-            st.image(img_filename, width=300)
-
+        if os.path.exists("interview_boy.png"):
+            st.image("interview_boy.png", width=300)
     with col2:
         st.markdown('<div class="login-brand">SPAY INDIA</div>', unsafe_allow_html=True)
         st.markdown('<div style="text-align: center; font-weight: 600; margin-bottom: 40px;">Candidate Portal</div>', unsafe_allow_html=True)
-    # ... baki ka code
-        st.markdown('<div class="input-label">Mobile Number</div>', unsafe_allow_html=True)
-        mobile_input = st.text_input("", placeholder="Write your mobile number", label_visibility="collapsed")
+
+        st.markdown('<div class="input-label">Email ID</div>', unsafe_allow_html=True)
+        email_input = st.text_input("", placeholder="Enter your email", label_visibility="collapsed")
 
         st.markdown('<div class="input-label">Enter OTP</div>', unsafe_allow_html=True)
         otp_field = st.text_input("", placeholder="Enter OTP", label_visibility="collapsed", type="password")
 
         btn_label = "VERIFY OTP" if st.session_state.otp_sent else "SEND OTP"
-        clicked = st.button(btn_label, use_container_width=True)
-
-        msg = st.empty()
-
-        if clicked:
+        if st.button(btn_label, use_container_width=True):
             if not st.session_state.otp_sent:
-                if mobile_input and len(mobile_input) == 10:
-                    # Generate OTP
+                if "@" in email_input and "." in email_input:
                     generated_otp = str(random.randint(100000, 999999))
-                    st.session_state.otp = generated_otp
-                    st.session_state.mobile = mobile_input
-                    st.session_state.otp_sent = True
-                    st.session_state.otp_time = get_ist_time()
-                    
-                    # Log OTP to Google Sheet
-                    try:
-                        scope = ["https://spreadsheets.google.com/feeds","https://www.googleapis.com/auth/drive"]
-                        creds = ServiceAccountCredentials.from_json_keyfile_dict(st.secrets["gcp_service_account"], scope)
-                        client = gspread.authorize(creds)
-                        sheet = client.open("Assessment_Results").get_worksheet(1)
-                        sheet.append_row([get_ist_time().strftime("%Y-%m-%d %H:%M"), mobile_input, generated_otp])
-                        msg.success(f"✅ OTP Sent Successfully! (Check Sheet)")
+                    if send_email_otp(email_input, generated_otp):
+                        st.session_state.otp = generated_otp
+                        st.session_state.user_email = email_input
+                        st.session_state.otp_sent = True
+                        st.session_state.otp_time = time.time()
+                        st.success("✅ OTP Sent to your Email!")
                         st.rerun()
-                    except Exception as e:
-                        msg.error(f"Sheet Error: {e}")
                 else:
-                    msg.error("❌ Invalid Mobile Number")
+                    st.error("❌ Invalid Email Address")
             else:
-                if otp_field == st.session_state.otp:
+                # 20 Minute Expiry Check
+                if time.time() - st.session_state.otp_time > 1200:
+                    st.error("⏰ OTP Expired! Please request a new one.")
+                    st.session_state.otp_sent = False
+                    st.rerun()
+                elif otp_field == st.session_state.otp:
                     st.session_state.logged_in = True
-                    st.session_state.user_logged = st.session_state.mobile
                     st.rerun()
                 else:
-                    msg.error("❌ Wrong OTP")
+                    st.error("❌ Wrong OTP")
     st.stop()
-
 # ================= TEST PAGE (10 Math + 10 English) =================
 
 # 1. Refresh Warning
