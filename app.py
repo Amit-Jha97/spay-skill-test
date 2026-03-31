@@ -273,26 +273,29 @@ ans = st.radio("Select Option:", q["options"], key=f"q_{curr}", label_visibility
 st.session_state.answers[curr] = ans
 
 # --- NAVIGATION BUTTONS (NEXT & SUBMIT SIDE-BY-SIDE) ---
+# --- NAVIGATION BUTTONS (Next & Submit Side-by-Side) ---
 st.markdown("<div style='margin-top: 20px;'></div>", unsafe_allow_html=True) 
+
+# Do barabar columns banaye
 col_nav1, col_nav2 = st.columns(2)
 
 with col_nav1:
-    # NEXT Button: Sirf tab tak jab tak 20th sawal na aa jaye
+    # NEXT Button: Jab tak 19th question tak na pahonche
     if curr < 19:
         if st.button("NEXT →", use_container_width=True):
             st.session_state.current_q += 1
             st.rerun()
     else:
-        # Akhri sawal par Next button ki jagah blank space
-        st.write("") 
+        st.write("") # Khali jagah layout maintain karne ke liye
 
-# --- SUBMIT Button logic ---
-if not st.session_state.submitted:
+with col_nav2:
+    # SUBMIT Button: Hamesha dikhega ya sirf 20th question par (aapki choice)
+    # Agar sirf last question par chahiye toh: if curr == 19:
     if st.button("SUBMIT TEST", use_container_width=True):
         score = sum(1 for i, ques in enumerate(st.session_state.questions_set) if st.session_state.answers[i] == ques["cor"])
         
         try:
-            # 1. Google Sheets mein data save karein
+            # Google Sheets Save Logic
             scope = ["https://spreadsheets.google.com/feeds","https://www.googleapis.com/auth/drive"]
             creds = ServiceAccountCredentials.from_json_keyfile_dict(st.secrets["gcp_service_account"], scope)
             client = gspread.authorize(creds)
@@ -302,27 +305,26 @@ if not st.session_state.submitted:
                 get_ist_time().strftime("%Y-%m-%d %H:%M"), 
                 name, 
                 st.session_state.user_email, 
-                hr, # Mobile number
+                hr, 
                 team, 
                 f"{score}/20"
             ])
             
-            # 2. State badal kar rerun karein taaki Thank You screen trigger ho jaye
+            # Submit hone ke baad Thank You screen trigger karein
             st.session_state.submitted = True
             st.rerun()
             
         except Exception as e:
             st.error(f"Save Error: {e}")
 
-# --- THANK YOU SCREEN (Jab submitted True ho jaye) ---
+# --- THANK YOU LOGIC (Poora test hide karne ke liye) ---
 if st.session_state.submitted:
-    st.empty() # Purana content clear karne ke liye
     st.markdown("""
-        <div style="text-align: center; padding: 40px; background-color: #e8f5e9; border-radius: 10px;">
-            <h1 style="color: #2e7d32;">Thank You!</h1>
-            <p style="font-size: 20px; color: #1b5e20;">Your test has been submitted successfully.</p>
-            <p>You can now close this window.</p>
+        <div style="text-align: center; padding: 100px 20px; background-color: white; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999;">
+            <h1 style="color: #1a237e; font-size: 50px;">🙏 THANK YOU!</h1>
+            <h3 style="color: #4caf50;">Test Submitted Successfully.</h3>
+            <p style="font-size: 18px; color: gray;">Your responses have been recorded. You can now close this tab.</p>
         </div>
     """, unsafe_allow_html=True)
     st.balloons()
-    st.stop() # Iske niche ka sara code (questions, forms) hide ho jayega
+    st.stop()
