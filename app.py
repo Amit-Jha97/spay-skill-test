@@ -211,7 +211,9 @@ col1, col2 = st.columns(2)
 with col1:
     st.markdown('<div class="input-label">Candidate Name</div>', unsafe_allow_html=True)
     name = st.text_input("", placeholder="Enter your name", label_visibility="collapsed")
-    st.markdown(f"**Logged in as:** {st.session_state.user_email}")
+    
+    st.markdown('<div class="input-label">Email Address</div>', unsafe_allow_html=True)
+    st.text_input("", value=st.session_state.user_email, disabled=True, label_visibility="collapsed")
 
 with col2:
     st.markdown('<div class="input-label">Mobile No</div>', unsafe_allow_html=True)
