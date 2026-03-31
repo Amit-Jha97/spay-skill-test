@@ -25,6 +25,8 @@ if "user_logged" not in st.session_state:
     st.session_state.user_logged = None
 if "last_activity" not in st.session_state:
     st.session_state.last_activity = get_ist_time()
+if "submitted" not in st.session_state:
+    st.session_state.submitted = False
 
 def logout():
     st.session_state.logged_in = False
@@ -103,11 +105,6 @@ st.markdown("""
         color: #6b7280 !important;
         opacity: 1 !important;
     }
-    div.stButton > button {
-    background-color: #1a237e !important;
-    color: white !important;  /* ← Text white रहेगा */
-    font-weight: bold !important;
-}
 </style>
 """, unsafe_allow_html=True)
 
@@ -247,6 +244,11 @@ with col2:
     team = st.text_input("", placeholder="Enter team name", label_visibility="collapsed")
 st.divider()
 
+# Validation: Check if all details are filled
+if not name or not hr or not team:
+    st.warning("⚠️ Please fill in all details (Name, HR Name, Team) before starting the test!")
+    st.stop()
+
 # Question Logic
 curr = st.session_state.current_q
 q = st.session_state.questions_set[curr]
@@ -265,14 +267,16 @@ with col_n:
             st.session_state.current_q += 1
             st.rerun()
 with col_s:
-    if st.button("SUBMIT TEST", use_container_width=True):
-        score = sum(1 for i,ques in enumerate(st.session_state.questions_set) if st.session_state.answers[i]==ques["cor"])
-        try:
-            creds = ServiceAccountCredentials.from_json_keyfile_dict(st.secrets["gcp_service_account"], ["https://spreadsheets.google.com/feeds","https://www.googleapis.com/auth/drive"])
-            client = gspread.authorize(creds)
-            sheet = client.open("Assessment_Results").sheet1
-            sheet.append_row([get_ist_time().strftime("%Y-%m-%d %H:%M"), name, st.session_state.mobile, hr, team, f"{score}/20"])
-            st.success("✅ Test Submitted!")
-            st.balloons()
-        except:
-            st.error("Error saving results.")
+    if st.button("SUBMIT TEST", use_container_width=True, disabled=st.session_state.get("submitted", False)):
+        if not st.session_state.get("submitted", False):
+            st.session_state.submitted = True
+            score = sum(1 for i,ques in enumerate(st.session_state.questions_set) if st.session_state.answers[i]==ques["cor"])
+            try:
+                creds = ServiceAccountCredentials.from_json_keyfile_dict(st.secrets["gcp_service_account"], ["https://spreadsheets.google.com/feeds","https://www.googleapis.com/auth/drive"])
+                client = gspread.authorize(creds)
+                sheet = client.open("Assessment_Results").sheet1
+                sheet.append_row([get_ist_time().strftime("%Y-%m-%d %H:%M"), name, st.session_state.mobile, hr, team, f"{score}/20"])
+                st.success("✅ Test Submitted!")
+                st.balloons()
+            except:
+                st.error("Error saving results.")
