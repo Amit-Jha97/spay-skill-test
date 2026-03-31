@@ -103,6 +103,11 @@ st.markdown("""
         color: #6b7280 !important;
         opacity: 1 !important;
     }
+    div.stButton > button {
+    background-color: #1a237e !important;
+    color: white !important;  /* ← Text white रहेगा */
+    font-weight: bold !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
