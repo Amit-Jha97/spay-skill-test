@@ -274,17 +274,37 @@ with col_n:
         if st.button("NEXT →", use_container_width=True):
             st.session_state.current_q += 1
             st.rerun()
-with col_s:
-    if st.button("SUBMIT TEST", use_container_width=True, disabled=st.session_state.get("submitted", False)):
-        if not st.session_state.get("submitted", False):
+# --- Submit Button Section ---
+if not st.session_state.submitted:
+    if st.button("SUBMIT TEST", use_container_width=True):
+        # 1. Pehle Calculation karein
+        score = sum(1 for i, ques in enumerate(st.session_state.questions_set) if st.session_state.answers[i] == ques["cor"])
+        
+        try:
+            # 2. Google Sheet Connection (Har submit par fresh connect karein)
+            scope = ["https://spreadsheets.google.com/feeds","https://www.googleapis.com/auth/drive"]
+            creds = ServiceAccountCredentials.from_json_keyfile_dict(st.secrets["gcp_service_account"], scope)
+            client = gspread.authorize(creds)
+            sheet = client.open("Assessment_Results").sheet1 # Sheet check karein
+            
+            # 3. Data Append (Sahi variables ke sath)
+            sheet.append_row([
+                get_ist_time().strftime("%Y-%m-%d %H:%M"), 
+                name, 
+                st.session_state.user_email, 
+                hr, 
+                team, 
+                f"{score}/20"
+            ])
+            
+            # 4. Success hone par hi flag True karein
             st.session_state.submitted = True
-            score = sum(1 for i,ques in enumerate(st.session_state.questions_set) if st.session_state.answers[i]==ques["cor"])
-            try:
-                creds = ServiceAccountCredentials.from_json_keyfile_dict(st.secrets["gcp_service_account"], ["https://spreadsheets.google.com/feeds","https://www.googleapis.com/auth/drive"])
-                client = gspread.authorize(creds)
-                sheet = client.open("Assessment_Results").sheet1
-                sheet.append_row([get_ist_time().strftime("%Y-%m-%d %H:%M"), name, st.session_state.mobile, hr, team, f"{score}/20"])
-                st.success("✅ Test Submitted!")
-                st.balloons()
-            except:
-                st.error("Error saving results.")
+            st.success("✅ Test Submitted Successfully!")
+            st.balloons()
+            st.rerun() # Page refresh taaki button gayab ho jaye
+            
+        except Exception as e:
+            st.error(f"❌ Error saving results: {e}. Please try again.")
+else:
+    st.warning("✅ You have already submitted the test.")
+    st.info("Results have been recorded. You can close this window.")
