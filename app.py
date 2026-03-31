@@ -93,10 +93,6 @@ st.markdown("""
         margin-bottom: 40px;
         font-weight: 600;
     }
-    div[data-baseweb="input"] > div {
-        background-color: #ffffff !important;
-        border: 1px solid #cbd5e1 !important;
-    }
     div[data-baseweb="input"] input {
         color: #111827 !important;
         -webkit-text-fill-color: #111827 !important;
