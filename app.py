@@ -211,11 +211,11 @@ col1, col2 = st.columns(2)
 with col1:
     st.markdown('<div class="input-label">Candidate Name</div>', unsafe_allow_html=True)
     name = st.text_input("", placeholder="Enter your name", label_visibility="collapsed")
-    mobile_field = st.text_input("**Mobile No**", value=st.session_state.mobile)
+    st.markdown(f"**Logged in as:** {st.session_state.user_email}")
 
 with col2:
-    st.markdown('<div class="input-label">HR Name</div>', unsafe_allow_html=True)
-    hr = st.text_input("", placeholder="Enter HR name", label_visibility="collapsed")
+    st.markdown('<div class="input-label">Mobile No</div>', unsafe_allow_html=True)
+    hr = st.text_input("", placeholder="Enter your mobile no", label_visibility="collapsed")
 
     st.markdown('<div class="input-label">Interview Team</div>', unsafe_allow_html=True)
     team = st.text_input("", placeholder="Enter team name", label_visibility="collapsed")
