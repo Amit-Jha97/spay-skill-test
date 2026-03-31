@@ -78,6 +78,31 @@ st.markdown("""
     span {
         color: #1a237e !important;
     }
+
+    .login-title {
+        font-size: 42px;
+        font-weight: bold;
+        color: #1a237e !important;
+        text-align: center;
+    }    
+    .login-subtitle {
+        text-align: center;
+        color: #111827 !important;
+        margin-bottom: 40px;
+        font-weight: 600;
+    }
+    div[data-baseweb="input"] > div {
+        background-color: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+    }
+    div[data-baseweb="input"] input {
+        color: #111827 !important;
+        -webkit-text-fill-color: #111827 !important;
+    }
+    div[data-baseweb="input"] input::placeholder {
+        color: #6b7280 !important;
+        opacity: 1 !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
