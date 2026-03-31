@@ -244,16 +244,45 @@ st.divider()
 if not name or not hr or not team:
     st.warning("⚠️ Please fill in all details (Name, HR Name, Team) before starting the test!")
     st.stop()
-
-# Question Logic
+# ================= QUESTION LOGIC (Fully Adaptive) =================
 curr = st.session_state.current_q
 q = st.session_state.questions_set[curr]
 
-st.markdown(f"### Question {curr+1} / {len(st.session_state.questions_set)} ({q['cat']})")
-st.markdown(f"<div style='color:#1a237e; font-weight:bold; font-size:22px;'>{q['q']}</div>", unsafe_allow_html=True)
+# 1. Question Number: Thoda upar (-35px) aur Gray color mein
+st.markdown(f"""
+    <div style='font-size: 14px; color: gray; margin-top: -35px; margin-bottom: 2px;'>
+        Question {curr+1} / {len(st.session_state.questions_set)} ({q['cat']})
+    </div>
+    """, unsafe_allow_html=True)
 
-ans = st.radio("Choose:", q["options"], key=f"q_{curr}")
-st.session_state.answers[curr] = ans
+# 2. Main Question: 
+# Dark Mode mein 'White' aur Light Mode mein 'Blue' dikhane ke liye niche wala CSS:
+st.markdown(f"""
+    <style>
+        /* Light Mode (Default) */
+        .adaptive-question {{
+            color: #1a237e; 
+            font-weight: bold; 
+            font-size: 26px; 
+            line-height: 1.2;
+        }}
+        
+        /* Dark Mode Detection */
+        @media (prefers-color-scheme: dark) {{
+            .adaptive-question {{
+                color: #FFFFFF !important;
+            }}
+        }}
+    </style>
+    <div class="adaptive-question">
+        {q['q']}
+    </div>
+    """, unsafe_allow_html=True)
+
+# 3. Radio Buttons (Options)
+st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True)
+ans = st.radio("Options:", q["options"], key=f"q_{curr}", label_visibility="collapsed")
+st.session_state.answers[curr] = ans = ans
 
 # Nav
 col_n, col_s = st.columns(2)
