@@ -262,43 +262,62 @@ st.markdown(f"""
     </div>
     """, unsafe_allow_html=True)
 
-# 3. Radio Buttons (Options)
+# ================= QUESTION LOGIC (Fully Adaptive) =================
+curr = st.session_state.current_q
+q = st.session_state.questions_set[curr]
+
+# 1. Question Number
+st.markdown(f"""
+    <div style='font-size: 14px; color: gray; margin-top: -35px; margin-bottom: 2px;'>
+        Question {curr+1} / {len(st.session_state.questions_set)} ({q['cat']})
+    </div>
+    """, unsafe_allow_html=True)
+
+# 2. Main Question
+st.markdown(f"""
+    <div class="adaptive-question">
+        {q['q']}
+    </div>
+    """, unsafe_allow_html=True)
+
+# 3. Radio Buttons (YE WAPAS ADD KIYA HAI)
+# label_visibility="collapsed" rakha hai taaki extra space na le
+ans = st.radio("Select Option:", q["options"], key=f"q_{curr}", label_visibility="collapsed")
+st.session_state.answers[curr] = ans
+
 # --- NAVIGATION BUTTONS (NEXT & SUBMIT SIDE-BY-SIDE) ---
-st.markdown("<br>", unsafe_allow_html=True) # Thoda gap dene ke liye
+st.markdown("<div style='margin-top: 20px;'></div>", unsafe_allow_html=True) 
 col_nav1, col_nav2 = st.columns(2)
 
 with col_nav1:
-    # NEXT Button: Sirf tab dikhega jab 20th question na ho
+    # NEXT Button: Sirf tab tak jab tak 20th sawal na aa jaye
     if curr < 19:
         if st.button("NEXT →", use_container_width=True):
             st.session_state.current_q += 1
             st.rerun()
     else:
-        # 20th Question par NEXT ki jagah khali jagah ya koi message
+        # Akhri sawal par Next button ki jagah blank space
         st.write("") 
 
 with col_nav2:
-    # SUBMIT Button: Hamesha dikhega par submit hone ke baad disable ho jayega
+    # SUBMIT Button logic
     submit_disabled = st.session_state.submitted
     button_text = "TEST SUBMITTED" if submit_disabled else "SUBMIT TEST"
     
     if st.button(button_text, use_container_width=True, disabled=submit_disabled):
-        # Calculation
         score = sum(1 for i, ques in enumerate(st.session_state.questions_set) if st.session_state.answers[i] == ques["cor"])
         
         try:
-            # Sheet Connection
             scope = ["https://spreadsheets.google.com/feeds","https://www.googleapis.com/auth/drive"]
             creds = ServiceAccountCredentials.from_json_keyfile_dict(st.secrets["gcp_service_account"], scope)
             client = gspread.authorize(creds)
             sheet = client.open("Assessment_Results").sheet1
             
-            # Data Saving
             sheet.append_row([
                 get_ist_time().strftime("%Y-%m-%d %H:%M"), 
                 name, 
                 st.session_state.user_email, 
-                hr, 
+                hr, # Aapne upar HR ki jagah Mobile input liya hai, ye usi ko save karega
                 team, 
                 f"{score}/20"
             ])
