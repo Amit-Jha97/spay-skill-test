@@ -149,48 +149,44 @@ st.markdown('<div class="warning-box">⚠️ Warning: Do not refresh this page. 
 # 2. Questions Database
 all_questions = [
     # ================= MATH QUESTIONS (20) =================
-    {"q":"25% of 200 = ?","options":["40","50","60","70"],"cor":"50","cat":"Math"},
-    {"q":"15% of 500 = ?","options":["65","70","75","80"],"cor":"75","cat":"Math"},
-    {"q":"30% of 900 = ?","options":["250","270","290","310"],"cor":"270","cat":"Math"},
-    {"q":"Calculate: 12 * 8 + 4","options":["96","100","104","108"],"cor":"100","cat":"Math"},
-    {"q":"Square root of 144?","options":["10","11","12","13"],"cor":"12","cat":"Math"},
-    {"q":"Solve: (50 + 50) / 2","options":["25","50","75","100"],"cor":"50","cat":"Math"},
-    {"q":"What is 1/4 of 1000?","options":["200","250","300","350"],"cor":"250","cat":"Math"},
-    {"q":"If a pen costs 15, what is the cost of 12 pens?","options":["160","170","180","190"],"cor":"180","cat":"Math"},
-    {"q":"20% of what number is 40?","options":["150","180","200","250"],"cor":"200","cat":"Math"},
-    {"q":"Solve: 150 - (25 * 4)","options":["50","75","100","125"],"cor":"50","cat":"Math"},
-    {"q":"What is the average of 10, 20, and 30?","options":["15","20","25","30"],"cor":"20","cat":"Math"},
-    {"q":"450 / 9 = ?","options":["40","45","50","55"],"cor":"50","cat":"Math"},
-    {"q":"If x + 15 = 40, find x.","options":["20","25","30","35"],"cor":"25","cat":"Math"},
-    {"q":"7 * 9 = ?","options":["56","63","72","81"],"cor":"63","cat":"Math"},
-    {"q":"Convert 0.75 into percentage.","options":["7.5%","75%","0.75%","750%"],"cor":"75%","cat":"Math"},
-    {"q":"Which is greater: 0.5 or 0.05?","options":["0.5","0.05","Both equal","None"],"cor":"0.5","cat":"Math"},
-    {"q":"How many minutes are there in 2.5 hours?","options":["120","140","150","160"],"cor":"150","cat":"Math"},
-    {"q":"10% of 1500 = ?","options":["100","150","200","250"],"cor":"150","cat":"Math"},
-    {"q":"(8 + 2) * (5 - 3) = ?","options":["10","15","20","25"],"cor":"20","cat":"Math"},
-    {"q":"Next number in series: 2, 4, 8, 16, ?","options":["20","24","32","36"],"cor":"32","cat":"Math"},
+  {"q":"A merchant sells a product for ₹1,200. The cost price was ₹1,000. What is the profit percentage?","options":["10%","15%","20%","25%"],"cor":"20%","cat":"Math"},
+  
+  {"q":"A customer pays ₹5,000 and wants 5% cashback. How much cashback should they receive?","options":["₹200","₹250","₹300","₹350"],"cor":"₹250","cat":"Math"},
+  
+  {"q":"You are given ₹10,000 target to collect. You collected ₹7,500. What % of the target is achieved?","options":["65%","70%","75%","80%"],"cor":"75%","cat":"Math"},
+  
+  {"q":"If you get 3 new merchants every day, how many will you onboard in 2 weeks (14 days)?","options":["21","28","36","42"],"cor":"42","cat":"Math"},
+  
+  {"q":"A sales team must increase deposits from ₹20 lakh to ₹25 lakh this month. What is the % growth needed?","options":["20%","22%","25%","30%"],"cor":"25%","cat":"Math"},
+  
+  {"q":"Merchant transactions fell from ₹50,000 last month to ₹40,000 this month. What is the % decline?","options":["15%","18%","20%","25%"],"cor":"20%","cat":"Math"},
+  
+  {"q":"A distributor earns 0.5% commission on ₹2,00,000 transactions. How much does he earn?","options":["₹500","₹750","₹1,000","₹1,200"],"cor":"₹1,000","cat":"Math"},
+  
+  {"q":"A merchant is charged ₹15 per QR transaction. If he does 200 transactions, what is his total cost?","options":["₹2,500","₹3,000","₹3,500","₹4,000"],"cor":"₹3,000","cat":"Math"},
+  
+  {"q":"If your company offers 2% extra incentive for achieving 120% of target, how much incentive will you get on a ₹50,000 target if you achieved ₹60,000?","options":["₹800","₹1,000","₹1,200","₹1,500"],"cor":"₹1,200","cat":"Math"},
+  
+  {"q":"You sold 120 POS devices, but only 90 are active. What % of devices are active?","options":["65%","70%","75%","80%"],"cor":"75%","cat":"Math"}
+
 
     # ================= ENGLISH QUESTIONS (20) =================
-    {"q":"She ___ to the office every day.","options":["go","goes","going","gone"],"cor":"goes","cat":"English"},
-    {"q":"Choose the opposite of 'Success'.","options":["Victory","Failure","Growth","Progress"],"cor":"Failure","cat":"English"},
-    {"q":"Which one is a synonym of 'Fast'?","options":["Slow","Quick","Delay","Lazy"],"cor":"Quick","cat":"English"},
-    {"q":"He is ___ honest man.","options":["a","an","the","no article"],"cor":"an","cat":"English"},
-    {"q":"Identify the correctly spelled word.","options":["Recieve","Receive","Recive","Receve"],"cor":"Receive","cat":"English"},
-    {"q":"Plural of 'Child' is ___","options":["Childs","Children","Childrens","Childes"],"cor":"Children","cat":"English"},
-    {"q":"They ___ playing cricket yesterday.","options":["was","were","is","am"],"cor":"were","cat":"English"},
-    {"q":"Opposite of 'Difficult' is ___","options":["Hard","Easy","Simple","Soft"],"cor":"Easy","cat":"English"},
-    {"q":"I ___ finished my work.","options":["has","have","is","am"],"cor":"have","cat":"English"},
-    {"q":"Look! The bus ___","options":["come","coming","is coming","comes"],"cor":"is coming","cat":"English"},
-    {"q":"Choose the correct preposition: He is fond ___ music.","options":["of","off","to","with"],"cor":"of","cat":"English"},
-    {"q":"Which is a noun?","options":["Beautiful","Run","London","Quickly"],"cor":"London","cat":"English"},
-    {"q":"Antonym of 'Brave' is ___","options":["Strong","Coward","Hero","Fearless"],"cor":"Coward","cat":"English"},
-    {"q":"Past tense of 'Eat' is ___","options":["Eated","Eating","Ate","Eaten"],"cor":"Ate","cat":"English"},
-    {"q":"I have been waiting here ___ two hours.","options":["since","for","from","at"],"cor":"for","cat":"English"},
-    {"q":"Identify the adjective.","options":["Speak","Blue","Slowly","Happiness"],"cor":"Blue","cat":"English"},
-    {"q":"'To cry wolf' means?","options":["To kill a wolf","To give a false alarm","To be brave","To shout"],"cor":"To give a false alarm","cat":"English"},
-    {"q":"Which sentence is correct?","options":["He don't like tea.","He doesn't likes tea.","He doesn't like tea.","He not like tea."],"cor":"He doesn't like tea.","cat":"English"},
-    {"q":"Synonym of 'Large' is ___","options":["Small","Huge","Tiny","Thin"],"cor":"Huge","cat":"English"},
-    {"q":"The cat is sitting ___ the table.","options":["in","under","between","over"],"cor":"under","cat":"English"}
+  {"q":"Choose the correct sentence:","options":["He don’t know the answer.","He doesn’t knew the answer.","He doesn’t know the answer.","He don’t knew the answer."],"cor":"He doesn’t know the answer.","cat":"English"},
+  
+  {"q":"Which article correctly completes the sentence? “She bought ___ umbrella.”","options":["a","an","the","no article"],"cor":"an","cat":"English"},
+  
+  {"q":"Identify the correct tense: “They ___ working on the project since morning.”","options":["is","has been","have been","was"],"cor":"have been","cat":"English"},
+  
+  {"q":"What is the opposite of increase?","options":["reduce","expand","rise","grow"],"cor":"reduce","cat":"English"},
+  
+  {"q":"Choose the correct word: “The manager will ___ the report tomorrow.”","options":["except","accept","expect","access"],"cor":"prepare","cat":"English"},
+  
+  {"q":"Find the correct synonym of important:","options":["trivial","necessary","casual","minor"],"cor":"necessary","cat":"English"},
+  
+  {"q":"What did the sales team fail to achieve?","options":["Daily target","Weekly target","Monthly target","Yearly target"],"cor":"Monthly target","cat":"English"},
+  
+  {"q":"What was the manager’s advice?","options":["Work less hours","Focus on old merchants","Focus on new merchants","Stop working on targets"],"cor":"Focus on new merchants","cat":"English"}
+
 ]
 
 # 3. 10+10 Selection Logic
