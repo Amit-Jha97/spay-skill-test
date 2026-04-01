@@ -167,7 +167,7 @@ all_questions = [
   
   {"q":"If your company offers 2% extra incentive for achieving 120% of target, how much incentive will you get on a ₹50,000 target if you achieved ₹60,000?","options":["₹800","₹1,000","₹1,200","₹1,500"],"cor":"₹1,200","cat":"Math"},
   
-  {"q":"You sold 120 POS devices, but only 90 are active. What % of devices are active?","options":["65%","70%","75%","80%"],"cor":"75%","cat":"Math"}
+  {"q":"You sold 120 POS devices, but only 90 are active. What % of devices are active?","options":["65%","70%","75%","80%"],"cor":"75%","cat":"Math"},
     
     # ================= ENGLISH QUESTIONS (20) =================
   {"q":"Choose the correct sentence:","options":["He don’t know the answer.","He doesn’t knew the answer.","He doesn’t know the answer.","He don’t knew the answer."],"cor":"He doesn’t know the answer.","cat":"English"},
